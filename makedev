@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+function build {
+    local dir=$1
+
+    if [[ -d $dir ]]; then
+        pushd $dir
+        git pull origin master
+        popd
+    else
+        git clone --depth 1 ict@dlfdmz:git/$dir
+    fi
+
+    pushd $dir
+    make
+    popd
+}
+
+function run {
+    local dir=$1
+
+    pushd $dir
+    make server > /dev/null &
+    popd
+}
+
+function quit {
+    env kill -INT -$$
+    wait
+}
+
+function main {
+    build silk
+    build felt
+
+    run silk
+    run felt
+
+    echo "Druk op enter om de servers te stoppen"
+    read
+
+    quit
+}
+
+main
